@@ -1,6 +1,4 @@
-﻿Country name,year,Life Ladder,Log GDP per capita,Social support,Healthy life expectancy at birth,Freedom to make life choices,Generosity,Perceptions of corruption,Positive affect,Negative affect
-United States,2006,7.182,10.924,0.965,68.060,0.911,,0.600,0.827,0.261
-United States,2007,7.513,10.933,,68.220,0.872,0.197,0.633,0.829,0.232
+﻿Country_name,year,Life_Ladder,Log_GDP_per_capita,Social_support,Healthy_life_expectancy_at_birth,Freedom_to_make_life_choices,Generosity,Perceptions_of_corruption,Positive_affect,Negative_affect
 United States,2008,7.280,10.922,0.953,68.380,0.878,0.255,0.668,0.872,0.227
 United States,2009,7.158,10.888,0.912,68.540,0.831,0.201,0.665,0.843,0.262
 United States,2010,7.164,10.905,0.926,68.700,0.828,0.244,0.690,0.861,0.231
