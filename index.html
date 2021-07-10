@@ -1,82 +1,116 @@
 <!DOCTYPE html>
-<html>
-<head>
-<script type="text/javascript" src="https://d3js.org/d3.v7.min.js"></script>
-<script type="text/javascript" >
-    function svg_slides(svg,delay) {
-        var slides={},
-            slide = 0,
-            delay = delay ? delay : 3500;
-            
-        svg.attr("preserveAspectRatio","xMidYid meet");
-    
-        rects = svg.selectAll("rect")[0];
-    
-        for (i=0;i<rects.length;i++) {
-            id = rects[i].id;
-            console.log(id);
-            if (id.slice(0,6)=='slide_') { 
-                slides[id.slice(6)]=rects[i] 
-                rects[i].scale_x = d3.scale.linear().range([rects[i].x.baseVal.value,rects[i].x.baseVal.value+rects[i].width.baseVal.value]).domain([0,1000]);
-                rects[i].scale_y = d3.scale.linear().range([rects[i].y.baseVal.value,rects[i].y.baseVal.value+rects[i].height.baseVal.value]).domain([0,1000]);
-                }
-            
-        }
-    
-        keys = Object.keys(slides).sort();
-        slides.keys = keys;
-     
-        function next_slide()  {
-            svg.transition().duration(delay).attr("viewBox",slides[keys[slide]].x.baseVal.value+" "+slides[keys[slide]].y.baseVal.value+" "+slides[keys[slide]].width.baseVal.value+" "+slides[keys[slide]].height.baseVal.value);
-        }
-    
-        d3.select("body").on("touchmove", function() { if(slide<keys.length-1) {slide++; console.log(slide);}});
-    
-        d3.select(window).on("keydown", function() {
-            switch (d3.event.keyCode) {
-              case 37: {if (slide>0) {slide=slide-1; console.log(slide);next_slide()};break}
-              case 39: {if(slide<keys.length-1) {slide++; console.log(slide);next_slide()};break}
-              case 36: {slide = 0;next_slide();break}
-              case 35: {slide = keys.length -1; next_slide();break}
-            }
-            
-         });
-    
-        // Start with the first slide
-        next_slide();
-        return slides
+<htmL>
+<meta charset="utf-8">
+
+<!-- Load d3.js -->
+<script src="https://d3js.org/d3.v4.js"></script>
+
+<!-- Create a div where the circle will take place -->
+<div id="dataviz_brushZoom"></div>
+<script>
+// set the dimensions and margins of the graph
+var margin = {top: 10, right: 30, bottom: 30, left: 60},
+    width = 460 - margin.left - margin.right,
+    height = 400 - margin.top - margin.bottom;
+
+// append the svg object to the body of the page
+var Svg = d3.select("#dataviz_brushZoom")
+  .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
+//Read the data
+d3.csv("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/iris.csv", function(data) {
+
+  // Add X axis
+  var x = d3.scaleLinear()
+    .domain([4, 8])
+    .range([ 0, width ]);
+  var xAxis = Svg.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x));
+
+  // Add Y axis
+  var y = d3.scaleLinear()
+    .domain([0, 9])
+    .range([ height, 0]);
+  Svg.append("g")
+    .call(d3.axisLeft(y));
+
+  // Add a clipPath: everything out of this area won't be drawn.
+  var clip = Svg.append("defs").append("svg:clipPath")
+      .attr("id", "clip")
+      .append("svg:rect")
+      .attr("width", width )
+      .attr("height", height )
+      .attr("x", 0)
+      .attr("y", 0);
+
+  // Color scale: give me a specie name, I return a color
+  var color = d3.scaleOrdinal()
+    .domain(["setosa", "versicolor", "virginica" ])
+    .range([ "#440154ff", "#21908dff", "#fde725ff"])
+
+  // Add brushing
+  var brush = d3.brushX()                 // Add the brush feature using the d3.brush function
+      .extent( [ [0,0], [width,height] ] ) // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
+      .on("end", updateChart) // Each time the brush selection changes, trigger the 'updateChart' function
+
+  // Create the scatter variable: where both the circles and the brush take place
+  var scatter = Svg.append('g')
+    .attr("clip-path", "url(#clip)")
+
+  // Add circles
+  scatter
+    .selectAll("circle")
+    .data(data)
+    .enter()
+    .append("circle")
+      .attr("cx", function (d) { return x(d.Sepal_Length); } )
+      .attr("cy", function (d) { return y(d.Petal_Length); } )
+      .attr("r", 8)
+      .style("fill", function (d) { return color(d.Species) } )
+      .style("opacity", 0.5)
+
+  // Add the brushing
+  scatter
+    .append("g")
+      .attr("class", "brush")
+      .call(brush);
+
+  // A function that set idleTimeOut to null
+  var idleTimeout
+  function idled() { idleTimeout = null; }
+
+  // A function that update the chart for given boundaries
+  function updateChart() {
+
+    extent = d3.event.selection
+
+    // If no selection, back to initial coordinate. Otherwise, update X axis domain
+    if(!extent){
+      if (!idleTimeout) return idleTimeout = setTimeout(idled, 350); // This allows to wait a little bit
+      x.domain([ 4,8])
+    }else{
+      x.domain([ x.invert(extent[0]), x.invert(extent[1]) ])
+      scatter.select(".brush").call(brush.move, null) // This remove the grey brush area as soon as the selection has been done
     }
 
-    
-    // There are probably better ways of loading the SVG, but this is one example I found
+    // Update axis and circle position
+    xAxis.transition().duration(1000).call(d3.axisBottom(x))
+    scatter
+      .selectAll("circle")
+      .transition().duration(1000)
+      .attr("cx", function (d) { return x(d.Sepal_Length); } )
+      .attr("cy", function (d) { return y(d.Petal_Length); } )
 
-    d3.xml("test.svg", "image/svg+xml", function(xml) {
-        d3.select("body").node().appendChild(xml.documentElement);
-        
-        svg=d3.select("body").select("svg")
-            .attr("height","100%")
-            .attr("width","100%");
-        slides = svg_slides(svg,1500);
-      
-        // Lets test the slide scales - put a bouncing ball on slide id 3
-        s = slides[3];
-        circle = svg.append("svg:circle")
-            .attr("cx",s.scale_x(500)).attr("cy",s.scale_y(500))
-            .attr("r",20)
-            .style("fill","steelblue");
-        
-        next = 500;                
-        
-        function bounce() {
-            next = -next;
-            circle.transition().duration(2500).attr("cx",s.scale_x(500+next))
-            .each("end",bounce);
-        }
-        
-        bounce();     
-    });
+    }
+
+
+
+})
 
 </script>
-</head>
-<body></body>
-</html>
