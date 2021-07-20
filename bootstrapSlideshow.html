@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Bootstrap Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script src="https://d3js.org/d3.v4.js"></script>
+<script src='https://unpkg.com/simple-statistics@7.7.0/dist/simple-statistics.min.js'>
+</script>
+<style>
+
+  .chartBox{
+    height:540px;
+    background-color:lightgray
+  }
+  .chart{
+    padding-left:25%;
+    padding-top:20px
+  }
+  h3, p{
+    color:black
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Carousel Example</h2>
+  <div id="myCarousel" class="carousel slide">
+    <!-- Indicators -->
+    <ol class="carousel-indicators">
+      <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+      <li data-target="#myCarousel" data-slide-to="1"></li>
+      <li data-target="#myCarousel" data-slide-to="2"></li>
+    </ol>
+
+    <!-- Wrapper for slides -->
+    <div class="carousel-inner">
+
+      <div class="item active">
+        <div id="my_dataviz1" class="chart chartBox"></div>
+
+<script>
+
+    // set the dimensions and margins of the graph
+    var margin = {top: 10, right: 30, bottom: 30, left: 60},
+        width = 460 - margin.left - margin.right,
+        height = 400 - margin.top - margin.bottom;
+    
+    // append the svg object to the body of the page
+    var svg = d3.select("#my_dataviz1")
+      .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")")
+              .attr('id',"svg1");
+    
+    //Read the data
+    d3.csv("https://raw.githubusercontent.com/alex6499cat/CS416-NarrativeVisualization/main/unitedstates-happiness-report.csv", function(data) {
+      data = data.splice(0,13)
+
+
+      
+
+      let svg = d3.select("#svg1")
+      // Add X axis
+      var x = d3.scaleLinear()
+        .domain([2008,2020])
+        .range([ 0, width ]);
+      svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x).tickFormat(d3.format("d")));
+      
+      // Add Y axis
+      var y = d3.scaleLinear()
+        .domain([0.787, 0.872])
+        .range([ height, 0]);
+      svg.append("g")
+        .call(d3.axisLeft(y));
+    
+      // Add dots
+      svg.append('g')
+        .selectAll("dot")
+        .data(data)
+        .enter()
+        .append("circle")
+          .attr("cx", function (d) { return x(d.year) } )
+          .attr("cy", function (d) { return y(parseFloat(d.Positive_affect)) } )
+          .attr("r", 8)
+          .style("fill", "#69b3a2")
+        
+      svg.append('g')
+        .selectAll("dot")
+        .data(data)
+        .enter()
+        .append("circle")
+          .attr("cx", function (d) { return x(d.year) } )
+          .attr("cy", function (d) { return y(parseFloat(d.Positive_affect)) } )
+          .attr("r", 8)
+          .style("fill", "#69b3a2")
+      
+
+    })
+    
+    </script>
+        <div class="carousel-caption">
+          <h3>Los Angeles</h3>
+          <p>LA is always so much fun!</p>
+        </div>
+      </div>
+
+      <div class="item">
+        <div id="my_dataviz2" class="chart chartBox"></div>
+
+<script>
+
+    // set the dimensions and margins of the graph
+    var margin = {top: 10, right: 30, bottom: 30, left: 60},
+        width = 460 - margin.left - margin.right,
+        height = 400 - margin.top - margin.bottom;
+    
+    // append the svg object to the body of the page
+    var svg = d3.select("#my_dataviz2")
+      .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")")
+              .attr('id',"svg2");
+    
+    //Read the data
+    d3.csv("https://raw.githubusercontent.com/alex6499cat/CS416-NarrativeVisualization/main/unitedstates-happiness-report.csv", function(data) {
+      data = data.splice(0,13)
+
+
+      
+
+      let svg = d3.select("#svg2")
+      // Add X axis
+      var x = d3.scaleLinear()
+        .domain([2008,2020])
+        .range([ 0, width ]);
+      svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x).tickFormat(d3.format("d")));
+      
+      // Add Y axis
+      var y = d3.scaleLinear()
+        .domain([0.787, 0.872])
+        .range([ height, 0]);
+      svg.append("g")
+        .call(d3.axisLeft(y));
+    
+      // Add dots
+      svg.append('g')
+        .selectAll("dot")
+        .data(data)
+        .enter()
+        .append("circle")
+          .attr("cx", function (d) { return x(d.year) } )
+          .attr("cy", function (d) { return y(parseFloat(d.Positive_affect)) } )
+          .attr("r", 8)
+          .style("fill", "#69b3a2")
+        
+      svg.append('g')
+        .selectAll("dot")
+        .data(data)
+        .enter()
+        .append("circle")
+          .attr("cx", function (d) { return x(d.year) } )
+          .attr("cy", function (d) { return y(parseFloat(d.Positive_affect)) } )
+          .attr("r", 8)
+          .style("fill", "#69b3a2")
+      
+
+    })
+    
+    </script>
+        <div class="carousel-caption">
+          <h3>Chicago</h3>
+          <p>Thank you, Chicago!</p>
+        </div>
+      </div>
+    
+      <div class="item">
+        <div id="my_dataviz3" class="chart chartBox"></div>
+
+<script>
+
+    // set the dimensions and margins of the graph
+    var margin = {top: 10, right: 30, bottom: 30, left: 60},
+        width = 460 - margin.left - margin.right,
+        height = 400 - margin.top - margin.bottom;
+    
+    // append the svg object to the body of the page
+    var svg = d3.select("#my_dataviz3")
+      .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")")
+              .attr('id',"svg3");
+    
+    //Read the data
+    d3.csv("https://raw.githubusercontent.com/alex6499cat/CS416-NarrativeVisualization/main/unitedstates-happiness-report.csv", function(data) {
+      data = data.splice(0,13)
+
+
+      
+
+      let svg = d3.select("#svg3")
+      // Add X axis
+      var x = d3.scaleLinear()
+        .domain([2008,2020])
+        .range([ 0, width ]);
+      svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x).tickFormat(d3.format("d")));
+      
+      // Add Y axis
+      var y = d3.scaleLinear()
+        .domain([0.787, 0.872])
+        .range([ height, 0]);
+      svg.append("g")
+        .call(d3.axisLeft(y));
+    
+      // Add dots
+      svg.append('g')
+        .selectAll("dot")
+        .data(data)
+        .enter()
+        .append("circle")
+          .attr("cx", function (d) { return x(d.year) } )
+          .attr("cy", function (d) { return y(parseFloat(d.Positive_affect)) } )
+          .attr("r", 8)
+          .style("fill", "#69b3a2")
+        
+      svg.append('g')
+        .selectAll("dot")
+        .data(data)
+        .enter()
+        .append("circle")
+          .attr("cx", function (d) { return x(d.year) } )
+          .attr("cy", function (d) { return y(parseFloat(d.Positive_affect)) } )
+          .attr("r", 8)
+          .style("fill", "#69b3a2")
+      
+
+    })
+    
+    </script>
+        <div class="carousel-caption">
+          <h3>New York</h3>
+          <p>We love the Big Apple!</p>
+        </div>
+      </div>
+  
+    </div>
+
+    <!-- Left and right controls -->
+    <a class="left carousel-control" href="#myCarousel" data-slide="prev">
+      <span class="glyphicon glyphicon-chevron-left"></span>
+      <span class="sr-only">Previous</span>
+    </a>
+    <a class="right carousel-control" href="#myCarousel" data-slide="next">
+      <span class="glyphicon glyphicon-chevron-right"></span>
+      <span class="sr-only">Next</span>
+    </a>
+  </div>
+</div>
+
+</body>
+</html>

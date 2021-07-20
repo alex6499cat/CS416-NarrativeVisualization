@@ -25,8 +25,7 @@
               "translate(" + margin.left + "," + margin.top + ")");
     
     //Read the data
-    d3.csv("https://raw.githubusercontent.com/alex6499cat/CS416-NarrativeVisualization/main/unitedstates-happiness-report.csv", function(data) {
-      data = data.splice(0,13)
+    d3.csv("https://raw.githubusercontent.com/alex6499cat/CS416-NarrativeVisualization/main/world-happiness-report.csv", function(data) {
 
 
       
@@ -54,19 +53,11 @@
         .enter()
         .append("circle")
           .attr("cx", function (d) { return x(d.year) } )
-          .attr("cy", function (d) { return y(parseFloat(d.Positive_affect)) } )
+          .attr("cy", function (d) { console.log(d);return y(parseFloat(d.Positive_affect)) } )
           .attr("r", 8)
           .style("fill", "#69b3a2")
         
-      svg.append('g')
-        .selectAll("dot")
-        .data(data)
-        .enter()
-        .append("circle")
-          .attr("cx", function (d) { return x(d.year) } )
-          .attr("cy", function (d) { return y(parseFloat(d.Positive_affect)) } )
-          .attr("r", 8)
-          .style("fill", "#69b3a2")
+
       
 
     })
