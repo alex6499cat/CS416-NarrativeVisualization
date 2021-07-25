@@ -2,13 +2,67 @@
 <meta charset="utf-8">
 
 <!-- Load d3.js -->
-<script src="https://d3js.org/d3.v4.js"></script>
+<script src="https://d3js.org/d3.v4.js">
+  </script>
 <script src='https://unpkg.com/simple-statistics@7.7.0/dist/simple-statistics.min.js'>
+ 
 </script>
-<!-- Create a div where the graph will take place -->
-<div id="my_dataviz"></div>
+<script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
+<style>
+  body{
+    background-color: whitesmoke;
+ }
 
+ svg {
+    background-color: white;
+    font-family: 'Lato';
+ }
+
+.annotation-note-title, text.title {
+  font-weight: bold;
+}
+
+text.title {
+  font-size: 1.2em;
+}
+.moveLeft{
+  margin-left:33%;
+  float:left
+}
+.header{
+
+  font:medium;
+  font-size: medium;
+  font-family: Arial, Helvetica, sans-serif;
+}
+.headerLarge{
+
+  font:medium;
+  font-size: x-large;
+  font-family: Arial, Helvetica, sans-serif;
+
+}
+.message{
+
+  font:medium;
+  font-size: small;
+  font-family: Arial, Helvetica, sans-serif;
+  padding-right:50%;
+
+}
+</style>
+<!-- Create a div where the graph will take place -->
+
+<div id="my_dataviz" class="moveLeft" >
+  
+</div>
+<div class="moveLeft">
+<button type="button" onclick="backward()" >Backward</button>
+<button type="button" onclick="forward()" >Forward</button>
+<p id="currentPage" >1/3</p>
+</div>
 <script>
+    var currentPage = 1
 
     // set the dimensions and margins of the graph
     var margin = {top: 10, right: 30, bottom: 30, left: 60},
@@ -16,50 +70,346 @@
         height = 400 - margin.top - margin.bottom;
     
     // append the svg object to the body of the page
-    var svg = d3.select("#my_dataviz")
+    
+    
+    //Read the data
+    buildHeadSection()
+    happinessGraph()
+    var forward = function(){
+       if(currentPage < 3){
+          currentPage = currentPage+1
+          updateCurrentPage(currentPage)
+          d3.select("#my_dataviz").html("")
+          buildHeadSection()
+          buildGraph(currentPage)
+       }
+    }
+    var backward = function(){
+       if(currentPage > 1){
+          currentPage = currentPage - 1
+          updateCurrentPage(currentPage)
+          d3.select("#my_dataviz").html("")
+          buildHeadSection()
+          buildGraph(currentPage)
+       }
+    }
+    function buildHeadSection(){
+      d3.select("#my_dataviz")
+      .append("p")
+      .attr("class","headerLarge")
+      .text("United States Happiness Report")
+      d3.select("#my_dataviz")
+      .append("p")
+      .attr("class","message")
+      .text("The United States has experienced a distinct drop in happiness from 2008-2010 according to Gallup Polls. Why might this be? An overall feeling of disconnection between residents? Major events that brought negativity? While we may never know all of the answers, we can explore the related data. You can see that some major national and world events correlate with large drops in happiness. Traverse through these three scenes by clicking the forward and backward buttons to explore what might be related to this drop in happiness.")
+    }
+    function buildGraph(number){
+      if(number === 1){
+        happinessGraph()
+      }else if(number === 2){
+        negativeEmotionGraph()
+      }else if(number === 3){
+        d3.select("#my_dataviz")
+        .append("p")
+        .text("Logarithmic GDP Per Capita in the United States 2008-2010")
+        .attr("class","header")
+        d3.select("#my_dataviz")
+        .append("p")
+        .attr("class","message")
+        .text("Select an item in the combobox to change the y-axis of the graph")
+        dynamicGraph("Log_GDP_per_capita")
+        buildCombobox("Log_GDP_per_capita")
+      }
+      
+    }
+    function updateCurrentPage(currentPage){
+      d3.select("#currentPage")
+      .text(currentPage + "/3")
+    }
+    function buildCombobox(value){
+
+      let items = [
+        {value:"Social_support",
+        text: "Social Support"},
+        {value:"Healthy_life_expectancy_at_birth",
+        text: "Healthy Life Expectancy at Birth"},
+        {value:"Freedom_to_make_life_choices",
+        text: "Freedom to Make Life Choices"},
+        {value:"Generosity",
+        text: "Generosity"},
+        {value:"Perceptions_of_corruption",
+        text: "Perceptions of Corruption"},
+      ]
+
+      d3.select("#my_dataviz")
+      .append("select")
+      .attr("id","graphType")
+      .attr("onchange","selectGraph()")
+
+      .append("option")
+      .attr("value","Log_GDP_per_capita")
+      .text("Logarithmic GDP Per Capita")
+
+      for(item of items){
+        d3.select("#graphType")
+        .append("option")
+        .attr("value",item.value)
+        .text(item.text)
+
+        if(item.value === value){
+          d3.select(`option[value='${value}']`)
+          .attr("selected",true)
+        }
+      }
+      
+    }
+    function selectGraph(){
+      
+      var yAxis = document.getElementById("graphType").value;
+      var t = document.getElementById("graphType");
+      selectedText = t.options[t.selectedIndex].text;
+
+      d3.select("#my_dataviz").html("")
+      buildHeadSection()
+
+
+      d3.select("#my_dataviz")
+      .append("p")
+      .text(selectedText + " in the United States 2008-2010")
+      .attr("class","header")
+      d3.select("#my_dataviz")
+      .append("p")
+      .attr("class","message")
+      .text("Select an item in the combobox to change the y-axis of the graph")
+      dynamicGraph(yAxis)
+      
+      buildCombobox(yAxis)
+      
+  }
+    function happinessGraph(){
+      d3.select("#my_dataviz")
+      .append("p")
+      .text("Positive Affect in the United States 2008-2010")
+      .attr("class","header")
+
+
+      var svg = d3.select("#my_dataviz")
       .append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
       .append("g")
         .attr("transform",
               "translate(" + margin.left + "," + margin.top + ")");
-    
-    //Read the data
-    d3.csv("https://raw.githubusercontent.com/alex6499cat/CS416-NarrativeVisualization/main/world-happiness-report.csv", function(data) {
+      d3.csv("https://raw.githubusercontent.com/alex6499cat/CS416-NarrativeVisualization/main/unitedstates-happiness-report.csv", function(data) {
 
-
+        data =data.splice(0,13)
+        
+  
+  
+        // Add X axis
+        var x = d3.scaleLinear()
+          .domain([2008,2020])
+          .range([ 0, width ]);
+        svg.append("g")
+          .attr("transform", "translate(0," + height + ")")
+          .call(d3.axisBottom(x).tickFormat(d3.format("d")));
+        
+        // Add Y axis
+        var y = d3.scaleLinear()
+          .domain([0.787, .872])
+          .range([ height, 0]);
+        svg.append("g")
+          .call(d3.axisLeft(y));
       
-
-
-      // Add X axis
-      var x = d3.scaleLinear()
-        .domain([2008,2020])
-        .range([ 0, width ]);
-      svg.append("g")
-        .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(x).tickFormat(d3.format("d")));
+        // Add dots
+        svg.append('g')
+          .selectAll("dot")
+          .data(data)
+          .enter()
+          .append("circle")
+            .attr("cx", function (d) { return x(d.year) } )
+            .attr("cy", function (d) { return y(parseFloat(d.Positive_affect)) } )
+            .attr("r", 8)
+            .style("fill", "#69b3a2")
+          
+  
+              const annotations = [
+                {
+                  note: {
+                    title: "2016 Presidential Election"
+                  },
+                  x: 250,
+                  y: 285,
+                  dy: 20,
+                  dx: 10
+                },{
+                  note: {
+                    title: "COVID-19 Pandemic"
+                  },
+                  x: 370,
+                  y: 360,
+                  dy: -40,
+                  dx: -10
+                },
+                {
+                  note: {
+                    title: "Peak of Great Recession"
+                  },
+                  x: 35,
+                  y: 125,
+                  dy: 40,
+                  dx: 15
+                }].map(function(d){ d.color = "#E8336D"; return d})
+        
+                const makeAnnotations = d3.annotation()
+                  .type(d3.annotationLabel)
+                  .annotations(annotations)
+                
+                svg.append("g")
+                  .attr("class", "annotation-group")
+                  .attr('id',"alexcat")
+                  .call(makeAnnotations)
+        
+  
+      })
+    }
+    function negativeEmotionGraph(){
+      d3.select("#my_dataviz")
+      .append("p")
+      .text("Negative Affect in the United States 2008-2010")
+      .attr("class","header")
+      var svg = d3.select("#my_dataviz")
+      .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")");
+      d3.csv("https://raw.githubusercontent.com/alex6499cat/CS416-NarrativeVisualization/main/unitedstates-happiness-report.csv", function(data) {
+        data = data.splice(0,13)
+  
+  
+        
+  
+  
+        // Add X axis
+        var x = d3.scaleLinear()
+          .domain([2008,2020])
+          .range([ 0, width ]);
+        svg.append("g")
+          .attr("transform", "translate(0," + height + ")")
+          .call(d3.axisBottom(x).tickFormat(d3.format("d")));
+        
+        // Add Y axis
+        var y = d3.scaleLinear()
+          .domain([0.227, 0.297])
+          .range([ height, 0]);
+        svg.append("g")
+          .call(d3.axisLeft(y));
       
-      // Add Y axis
-      var y = d3.scaleLinear()
-        .domain([0.787, 0.872])
-        .range([ height, 0]);
-      svg.append("g")
-        .call(d3.axisLeft(y));
+        // Add dots
+        svg.append('g')
+          .selectAll("dot")
+          .data(data)
+          .enter()
+          .append("circle")
+            .attr("cx", function (d) { return x(d.year) } )
+            .attr("cy", function (d) { return y(parseFloat(d.Negative_affect)) } )
+            .attr("r", 8)
+            .style("fill", "#69b3a2")
+        
+            const annotations = [
+            {
+              note: {
+                title: "2016 Presidential Election"
+              },
+              x: 250,
+              y: 175,
+              dy: 20,
+              dx: 10
+            },{
+              note: {
+                title: "COVID-19 Pandemic"
+              },
+              x: 370,
+              y: 18,
+              dy: 30,
+              dx: -15
+            },
+            {
+              note: {
+                title: "Peak of Great Recession"
+              },
+              x: 35,
+              y: 185,
+              dy: 40,
+              dx: 15
+            }].map(function(d){ d.color = "#E8336D"; return d})
     
-      // Add dots
-      svg.append('g')
-        .selectAll("dot")
-        .data(data)
-        .enter()
-        .append("circle")
-          .attr("cx", function (d) { return x(d.year) } )
-          .attr("cy", function (d) { console.log(d);return y(parseFloat(d.Positive_affect)) } )
-          .attr("r", 8)
-          .style("fill", "#69b3a2")
+            const makeAnnotations = d3.annotation()
+              .type(d3.annotationLabel)
+              .annotations(annotations)
+            
+            svg.append("g")
+              .attr("class", "annotation-group")
+              .attr('id',"alexcat")
+              .call(makeAnnotations)
+      })
+    }
+    function dynamicGraph(yAxis){
+      var svg = d3.select("#my_dataviz")
+      .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .style("float","left")
+      .append("g")
+        .attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")");
+        d3.csv("https://raw.githubusercontent.com/alex6499cat/CS416-NarrativeVisualization/main/unitedstates-happiness-report.csv", function(data) {
+        data = data.splice(0,13)
+
+        let highest = 0
+        let lowest = 100
+        for(item of data){
+            if(item[yAxis] > highest){
+                highest = item[yAxis]
+            }
+            if(item[yAxis] < lowest){
+                lowest = item[yAxis]
+            }
+        }
+
+        // Add X axis
+        var x = d3.scaleLinear()
+          .domain([2008,2020])
+          .range([ 0, width ]);
+        svg.append("g")
+          .attr("transform", "translate(0," + height + ")")
+          .call(d3.axisBottom(x).tickFormat(d3.format("d")));
+        
+        // Add Y axis
+        var y = d3.scaleLinear()
+            .domain([lowest, highest])
+            .range([ height, 0]);
+        svg.append("g")
+            .call(d3.axisLeft(y));
+        
+        // Add dots
+        svg.append('g')
+            .selectAll("dot")
+            .data(data)
+            .enter()
+            .append("circle")
+            .attr("cx", function (d) { return x(d.year) } )
+            .attr("cy", function (d) { return y(parseFloat(d[yAxis])) } )
+            .attr("r", 8)
+            .style("fill", "#69b3a2")
         
 
+        })
+
       
 
-    })
-    
+    }
+
     </script>
